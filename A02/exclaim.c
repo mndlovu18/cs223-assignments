@@ -3,6 +3,14 @@
 #include <time.h>
 #include <string.h>
 
+/* This is a program that turns a word
+ * into an exclaimation.
+ */
+
+/* main : prints an exclamation given
+ * a word.
+ */
+
 int main() {
   char buff[32];
   printf("Enter a word: ");

@@ -3,6 +3,13 @@
 #include <time.h>
 #include <string.h>
 
+/* This is a program that computes
+ * an acronym from a given phrase.
+ */
+
+/* main: prints acronym from given
+ * phrase.
+ */
 int main() {
   char buff[1024];
   printf("Enter a phrase: ");

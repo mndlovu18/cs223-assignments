@@ -2,8 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-//Struct to hold songs
+/*
+  A program that fills an array with three or more songs and 
+  then allows the user to edit the data in the array.
+*/
 
+//Struct to hold songs
 struct Song {
    char title[1024];
    char artist[1024];
@@ -12,8 +16,13 @@ struct Song {
    float danceability;
 };
 
+/* printSongs: prints the songs in the array
+ * songs[]: an array of songs
+ * numSongs: the number of songs in array
+ */
 void printSongs(struct Song songs[], int numSongs);
 
+/* main: allows the user to view and edit songs */
 int main() {
   //Initialize songs
   struct Song songs[3]; //an array of songs
@@ -64,29 +73,29 @@ int main() {
   if (strcmp(attribute, "artist") == 0) {
         printf("Enter a artist: ");
         char input[1024];
-        scanf("%s", input);
+        scanf("%s*c", input);
         strcpy(songs[songId].artist, input);
         printSongs(songs, 3);
     } else if (strcmp(attribute, "title") == 0) {
         printf("Enter a title: ");
-        char title[32];
-        scanf("%s", title);
+        char title[1024];
+        scanf("%s*c", title);
         strcpy(songs[songId].title, title);
         printSongs(songs, 3);
     } else if (strcmp(attribute, "duration") == 0) {
         printf("Enter a duration (minutes): ");
         int duration_min;
-        scanf("%d",&duration_min);
+        scanf("%d*c",&duration_min);
         printf("Enter a duration (seconds): ");
         int duration_sec;
-        scanf("%d", &duration_sec);
+        scanf("%d*c", &duration_sec);
         songs[songId].duration_min = duration_min;
         songs[songId].duration_sec = duration_sec;
         printSongs(songs, 3);
     } else if (strcmp(attribute, "danceability") == 0) {
         printf("Enter danceability: ");
         float danceability;
-        scanf("%f", &danceability);
+        scanf("%f*c", &danceability);
         songs[songId].danceability = danceability;
         printSongs(songs, 3);
     } else {
@@ -95,6 +104,10 @@ int main() {
   return 0;
 }
 
+/* printSongs: prints the songs in the array
+ * songs[]: an array of songs
+ * numSongs: the number of songs in array
+ */
 void printSongs(struct Song songs[], int numSongs) {
     for (int i = 0; i < numSongs; i++) {
         printf("%d) %-20s artist: %-20s duration: %d:%02d  danceability: %.2f ", i, songs[i].title, songs[i].artist, songs[i].duration_min, songs[i].duration_sec, songs[i].danceability);
