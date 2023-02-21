@@ -78,7 +78,8 @@ void print_song(Song *song, int song_count) {
     int minutes = song->duration_ms / 60000;
     int seconds = (song->duration_ms % 60000) / 1000;
     printf("%d) %-30s artist: %-20s duration: %d:%02d D: %0.3f E: %0.3f T: %0.3f V: %0.3f\n",
-            song_count, song->title, song->artist, minutes, seconds, song->danceability, song->energy, song->tempo, song->valence);
+            song_count, song->title, song->artist, minutes, seconds, song->danceability, 
+            song->energy, song->tempo, song->valence);
 }
 
 /**
@@ -118,6 +119,8 @@ void remove_song(Song **head, int song_index) {
         previous->next = current->next;
     }
     free(current);
+    free(current->title);
+    free(current->artist);
 }
 
 /**
@@ -129,6 +132,8 @@ void free_songs(Song **head) {
     Song *next = NULL;
     while (current != NULL) {
         next = current->next;
+        free(current->title);
+        free(current->artist);
         free(current);
         current = next;
     }
@@ -186,6 +191,7 @@ int main() {
         new_song->tempo, new_song->valence);
 
         song_index++;
+       free(new_song);
   }
     while (1) {
          int num_songs = 0;
@@ -214,9 +220,11 @@ int main() {
             }
 
             Song *most_danceable = find_most_danceable(head);
-            printf("--------------------------------------- Most danceable -------------------------------------------------------------\n");
+            printf("--------------------------------------- Most danceable ------"
+                   "-------------------------------------------------------\n");
             print_song(most_danceable, 0);
-            printf("--------------------------------------------------------------------------------------------------------------------\n");
+            printf("-------------------------------------------------------------"
+                   "-------------------------------------------------------\n");
             printf("\n");
 
             int song_index = 0;//find the song_index of the most danceable song
@@ -233,7 +241,6 @@ int main() {
             num_songs--;
         }
     }
-
 
   return 0;
 }
