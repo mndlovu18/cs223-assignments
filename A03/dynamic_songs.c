@@ -29,7 +29,9 @@ void print_songs(struct song *songs, int num_songs) {
     printf("Welcome to Dynamic Donna's Danceability Directory. \n");
     printf("\n");
     for (int i = 0; i < num_songs; i++) {
-        printf("%d) %-30s artist: %-20s duration: %d:%02d D: %0.3f E: %0.3f T: %0.3f V: %0.3f \n", i, songs[i].title, songs[i].artist, songs[i].duration / 60000, (songs[i].duration % 60000) / 1000, songs[i].danceability, songs[i].energy, songs[i].tempo, songs[i].valence);
+        printf("%d) %-30s artist: %-20s duration: %d:%02d D: %0.3f E: %0.3f T: %0.3f V: %0.3f \n",
+            i, songs[i].title, songs[i].artist, songs[i].duration / 60000, (songs[i].duration % 60000) / 1000, 
+            songs[i].danceability, songs[i].energy, songs[i].tempo, songs[i].valence);
 
     }
 }
