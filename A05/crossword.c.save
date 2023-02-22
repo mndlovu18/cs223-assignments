@@ -30,8 +30,7 @@ int main(int argc, char *argv[]) {
     char *word2 = argv[2];
     int word1_len = strlen(word1);
     int word2_len = strlen(word2);
-    
-    int common_index = -1; //keep track of the 
+    int common_index = -1; //keep track of the
                            //index of the common letter in word1
     for (int i = 0; i < word1_len; i++) {
         for (int j = 0; j < word2_len; j++) {
@@ -51,10 +50,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    char **crossword = (char **) malloc(word2_len * 
+    char **crossword = (char **) malloc((word2_len + 1) *
         sizeof(char *)); //allocate memory for the crossword
     for (int i = 0; i < word2_len; i++) {
-        crossword[i] = (char *) malloc(word1_len * 
+        crossword[i] = (char *) malloc((word1_len + 1) *
             sizeof(char));
     }
 
@@ -67,26 +66,4 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < word1_len; i++) {
         if (i == common_index) {
             for (int j = 0; j < word2_len; j++) {
-                crossword[j][i] = word2[j]; //add word2 to the crossword
-            }
-        } else {
-            crossword[word2_len - 1][i] = word1[i]; //add word1 to the crossword
-        }
-    }
-
-    for (int i = 0; i < word2_len; i++) {
-        for (int j = 0; j < word1_len; j++) {
-            printf("%c ", crossword[i][j]); //print the crossword
-        }
-        printf("\n");
-    }
-
-    for (int i = 0; i < word2_len; i++) {
-        free(crossword[i]); //free the memory
-    }
-
-    free(crossword);
-
-    return 0;
-}
-
+                crossword[j][i] = word2[j]; //add word2 to the 
