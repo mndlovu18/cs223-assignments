@@ -11,33 +11,14 @@
 #include "read_ppm.h"
 #include "write_ppm.h"
 
-/*
-In the file, encode.c, write a program that reads in a PPM file (raw, or binary, format) and asks the user for a message to embed within it.
-
-$ make encode
-gcc -g -Wall -Wvla -Werror encode.c read_ppm.c -o encode
-$ ./encode feep-raw.ppm
-Reading feep-raw.ppm with width 4 and height 4
-Max number of characters in the image: 5
-Enter a phrase: lol
-Writing file feep-raw-encoded.ppm
-Requirements/Hints:
-
-You should read the PPM filename as a command line argument
-
-You should report the usage if no file is given to the program
-
-You should report an error if the file cannot be read
-
-You should output a new file based on the input name. For example, if the input is feep-raw.ppm, the new file with the encoded message should be feep-raw-encoded.ppm.
-
-Re-use your implementation of read_ppm from Assignment 05.
-
-Output the size of the image along with the maximum number of characters it can store
-
-For debugging, try printing out values in hex format, e.g. printf("%02X", c);
-*/
-
+/**
+ * @brief This is the main driver function for the program
+ * that reads in a PPM file (raw, or binary, format) and
+ * asks the user for a message to embed within it.
+ * @param argc The number of arguments
+ * @param argv The arguments
+ * @return int 
+ */
 int main(int argc, char** argv) {
   if (argc != 2) {
     printf("usage: encode <file.ppm>\n");
@@ -45,7 +26,7 @@ int main(int argc, char** argv) {
   }
 
   char* filename = argv[1];
-  char output_filename[strlen(filename) + 12]; // 12 is the length of "-encoded.ppm"
+  char output_filename[256]; 
   
   int w, h;
   struct ppm_pixel* img = read_ppm(filename, &w, &h);
@@ -56,9 +37,9 @@ int main(int argc, char** argv) {
 
   int max_chars = w * h * 3 / 8; // 3 bytes per pixel, 8 bits per byte
   printf("Reading %s with width %d and height %d (max %d characters) \n", filename, w, h, max_chars);
-  printf("Max number of characters in the image: %d", max_chars);
+  printf("Max number of characters in the image: %d\n", max_chars);
 
-  char message[max_chars + 1]; // +1 for null terminator
+  char message[1024]; 
   memset(message, 0, max_chars + 1); // initialize to all 0s
 
   printf("Enter a phrase: ");
