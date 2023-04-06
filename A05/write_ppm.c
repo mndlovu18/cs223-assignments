@@ -23,7 +23,7 @@ void write_ppm(const char* filename, struct ppm_pixel* pixels, int w, int h) {
         fprintf(stderr, "Failed to open file %s for writing\n", filename);
         return;
     }
-    fprintf(fp, "P6\n%d %d\n255\n", w, h);
+    fprintf(fp, "P6\n# Created by Minolta Ndlovu's program\n%d %d\n255\n", w, h);
     fwrite(pixels, sizeof(struct ppm_pixel), w*h, fp);
     fclose(fp);
 }
