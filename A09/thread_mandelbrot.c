@@ -61,7 +61,7 @@ void* compute_mandelbrot(void* arg) {
     int end_row = start_row + data->size / 2;
 
     printf("Thread %p) sub-image block: cols (%d, %d) to rows (%d,%d)\n",
-           pthread_self(), start_col, end_col, start_row, end_row);
+           (void*)pthread_self(), start_col, end_col, start_row, end_row);
 
      for (int row = start_row; row < end_row; ++row) { // for each row, compute the mandelbrot set
         for (int col = start_col; col < end_col; ++col) { //for each column, compute the mandelbrot set
@@ -75,7 +75,7 @@ void* compute_mandelbrot(void* arg) {
         }
     }
 
-    printf("Thread %p) finished\n", pthread_self());
+    printf("Thread %p) finished\n", (void *)pthread_self());
     return NULL;
 }
 
