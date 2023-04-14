@@ -1,3 +1,9 @@
+/*----------------------------------------------
+ * Author:Minolta Ndlovu 
+ * Date: 04/13/2023
+ * Description: A program that that outputs a 
+ * PPM image of the Buddhabrot using multiple threads.
+ ---------------------------------------------*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,7 +14,6 @@
 #include "read_ppm.h"
 #include "write_ppm.h"
 #include <sys/time.h>
-
 
 int size = 480;
 float xmin = -2.0;
@@ -28,18 +33,29 @@ typedef struct {
   
 struct ppm_pixel *image;   
 
-int mandelbrot(float x0, float y0) {
+/*
+ * A function that computes the number of iterations.
+ * @param real The real part of the complex number.
+ * @param imag The imaginary part of the complex number.
+ * @return The number of iterations.
+ */
+int mandelbrot(float real, float imag) {
     float x = 0, y = 0;
     int iter = 0;
     while (iter < maxIterations && x * x + y * y < 4) {
-        float xtmp = x * x - y * y + x0;
-        y = 2 * x * y + y0;
+        float xtmp = x * x - y * y + real;
+        y = 2 * x * y + imag;
         x = xtmp;
         iter++;
     }
     return iter;
 }
 
+/*
+ * A function that computes the buddhabrot set for a given sub-image block.
+ * @param data A pointer to the thread data.
+ * @return NULL
+ */
 void *thread_start_routine(void *data) {
     ThreadData *td = (ThreadData *)data;
     int startX = td->startX, endX = td->endX, startY = td->startY, endY = td->endY;
@@ -49,15 +65,15 @@ void *thread_start_routine(void *data) {
      printf("Thread %p) sub-image block: cols (%d, %d) to rows (%d,%d)\n",
            (void*)pthread_self(), startX, endX, startY, endY);
 
-    for (int y = startY; y < endY; y++) {
-        for (int x = startX; x < endX; x++) {
+    for (int y = startY; y < endY; y++) { //compute the buddhabrot set for each row
+        for (int x = startX; x < endX; x++) { //compute for each column
             float x0 = xmin + x * xScale;
             float y0 = ymax - y * yScale;
             int value = mandelbrot(x0, y0);
 
-            if (value < maxIterations) { 
+            if (value < maxIterations) { //if the point is in the set
                 float x = 0, y = 0;
-                for (int iter = 0; iter < value; iter++) {
+                for (int iter = 0; iter < value; iter++) { //iterate until the point is not in the set
                     float xtmp = x * x - y * y + x0;
                     y = 2 * x * y + y0;
                     x = xtmp;
@@ -78,7 +94,7 @@ void *thread_start_routine(void *data) {
         }
     }
 
-    pthread_barrier_wait(&barrier);
+    pthread_barrier_wait(&barrier); //wait for all threads to finish
 
     float gamma = 0.681;
     float factor = 1.0 / gamma;
@@ -87,11 +103,11 @@ void *thread_start_routine(void *data) {
             float value = 0;
 
             if (counts[y][x] > 0) {
-                value = log((double)counts[y][x]) / log(max_count);
+                value = log((double)counts[y][x]) / log(max_count); //the value is used to compute the color
                 value = pow(value, factor);
             }
 
-            struct ppm_pixel color = {
+            struct ppm_pixel color = { //convert the value to a color
                 .red = value * 255,
                 .green = value * 255,
                 .blue = value * 255,
@@ -105,6 +121,12 @@ void *thread_start_routine(void *data) {
   return NULL;
 }
 
+/*
+ * This is the main driver for the program.
+ * @param argc The number of command line arguments.
+ * @param argv The command line arguments.
+ * @return 0 if successful, 1 otherwise.
+ */
 int main(int argc, char* argv[]) {
   int opt;
   while ((opt = getopt(argc, argv, ":s:l:r:t:b:p:")) != -1) {
@@ -158,7 +180,6 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < numThreads; i++) {
         pthread_join(threads[i], NULL);
     }
-
 
     gettimeofday(&end, NULL);
     double elapsed = (end.tv_sec - start.tv_sec) + 1e-6 * (end.tv_usec - start.tv_usec);
