@@ -22,7 +22,7 @@
 * @return The number of iterations.
 */
 int mandelbrot(float real, float imag, int max_iterations) {
-    int n;
+  int n;
   float r = 0.0, i = 0.0, rr = 0.0, ii = 0.0;
   for (n = 0; n < max_iterations && rr + ii <= 4.0; n++) {
     i = 2 * r * i + imag;

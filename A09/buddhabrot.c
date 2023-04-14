@@ -7,9 +7,8 @@
 #include <math.h>
 #include "read_ppm.h"
 #include "write_ppm.h"
+#include <sys/time.h>
 
-#define MAX_ITER 1000
-#define THREADS 4
 
 int size = 480;
 float xmin = -2.0;
@@ -26,15 +25,13 @@ int numThreads = 4;
 typedef struct {
     int startX, endX, startY, endY;
 } ThreadData;
-
-int *membership;          
-unsigned int max_count;    
+  
 struct ppm_pixel *image;   
 
 int mandelbrot(float x0, float y0) {
     float x = 0, y = 0;
     int iter = 0;
-    while (iter < MAX_ITER && x * x + y * y < 4) {
+    while (iter < maxIterations && x * x + y * y < 4) {
         float xtmp = x * x - y * y + x0;
         y = 2 * x * y + y0;
         x = xtmp;
@@ -43,20 +40,22 @@ int mandelbrot(float x0, float y0) {
     return iter;
 }
 
-void *start(void *data) {
+void *thread_start_routine(void *data) {
     ThreadData *td = (ThreadData *)data;
     int startX = td->startX, endX = td->endX, startY = td->startY, endY = td->endY;
     float xScale = (xmax - xmin) / size;
     float yScale = (ymax - ymin) / size;
 
-   
+     printf("Thread %p) sub-image block: cols (%d, %d) to rows (%d,%d)\n",
+           (void*)pthread_self(), startX, endX, startY, endY);
+
     for (int y = startY; y < endY; y++) {
         for (int x = startX; x < endX; x++) {
             float x0 = xmin + x * xScale;
             float y0 = ymax - y * yScale;
             int value = mandelbrot(x0, y0);
 
-            if (value < MAX_ITER) { 
+            if (value < maxIterations) { 
                 float x = 0, y = 0;
                 for (int iter = 0; iter < value; iter++) {
                     float xtmp = x * x - y * y + x0;
@@ -101,6 +100,8 @@ void *start(void *data) {
             image[y * size + x] = color;
         }
     }
+
+  printf("Thread %p) finished\n", (void *)pthread_self());
   return NULL;
 }
 
@@ -122,7 +123,6 @@ int main(int argc, char* argv[]) {
   printf("  X range = [%.4f,%.4f]\n", xmin, xmax);
   printf("  Y range = [%.4f,%.4f]\n", ymin, ymax);
 
-  membership = (int *)malloc(size * size * sizeof(int));
   counts = malloc(size * sizeof(unsigned int *));
   for (int i = 0; i < size; i++) {
     counts[i] = (unsigned int *)calloc(size, sizeof(unsigned int));
@@ -138,10 +138,13 @@ int main(int argc, char* argv[]) {
 
     threads = (pthread_t *)malloc(numThreads * sizeof(pthread_t));
     thread_data = (ThreadData *)malloc(numThreads * sizeof(ThreadData));
+    
 
-   
+    struct timeval start, end; // start and end timers
+    gettimeofday(&start, NULL); // start timer
+
     int blockSizeX = size / 2;
-    int blockSizeY = size / numThreads;
+    int blockSizeY = size / 2;
 
     for (int i = 0; i < numThreads; i++) {
         thread_data[i].startX = (i % 2) * blockSizeX;
@@ -149,19 +152,28 @@ int main(int argc, char* argv[]) {
         thread_data[i].startY = (i / 2) * blockSizeY;
         thread_data[i].endY = thread_data[i].startY + blockSizeY;
 
-        pthread_create(&threads[i], NULL, start, &thread_data[i]);
+        pthread_create(&threads[i], NULL, thread_start_routine, &thread_data[i]);
     }
 
     for (int i = 0; i < numThreads; i++) {
         pthread_join(threads[i], NULL);
     }
 
+
+    gettimeofday(&end, NULL);
+    double elapsed = (end.tv_sec - start.tv_sec) + 1e-6 * (end.tv_usec - start.tv_usec);
+    printf("Computed mandelbrot set (%dx%d) in %f seconds\n", size, size, elapsed);
+   
+
     char filename[128];
     snprintf(filename, sizeof(filename), "buddhabrot-%d-%ld.ppm", size, time(0));
     write_ppm(filename, image, size, size);
     printf("Writing file: %s\n", filename);
     
-    free(membership);
+    for (int i = 0; i < size; i++) {
+        free(counts[i]);
+    }
+
     free(counts);
     free(image);
     free(threads);
@@ -169,9 +181,7 @@ int main(int argc, char* argv[]) {
 
     pthread_mutex_destroy(&count_mutex);
     pthread_barrier_destroy(&barrier);
-
     return 0;
     
-
 }
 
