@@ -1,3 +1,8 @@
+/*----------------------------------------------
+ * Author:Minolta Ndlovu 
+ * Date: 04/23/2023
+ * Description: A program that outputs the memory statistics.
+ ---------------------------------------------*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -16,9 +21,52 @@ struct chunk {
   struct chunk *next;
 };
 
+/*
+* A function that prints the memory statistics.
+* @param freelist The free list of chunks.
+* @param buffer The buffer of allocated chunks.
+* @param len The length of the buffer.
+*/
 void memstats(struct chunk* freelist, void* buffer[], int len) {
+    int total_blocks = 0;
+    int free_blocks = 0;
+    int used_blocks = 0;
+    int total_memory = 0;
+    int free_memory = 0;
+    int used_memory = 0;
+
+    struct chunk* current = freelist;
+    while (current != NULL) { //increment the counters for each chunk in the free list
+        free_blocks++;
+        free_memory += current->size;
+        total_blocks++;
+        total_memory += current->size;
+        current = current->next;
+    }
+
+    for (int i = 0; i < len; i++) { //increment the counters for each chunk in the buffer
+        if (buffer[i] != NULL) {
+            struct chunk* used_chunk = (struct chunk*)buffer[i] - 1;
+            used_blocks++;
+            used_memory += used_chunk->used;
+            total_blocks++;
+            total_memory += used_chunk->size;
+        }
+    }
+
+    double underutilized_memory = (double)(total_memory - used_memory) / total_memory; //calculate the underutilized memory
+
+    printf("Total blocks: %d Free blocks: %d Used blocks: %d\n", total_blocks, free_blocks, used_blocks);
+    printf("Total memory allocated: %d Free memory: %d Used memory: %d\n", total_memory, free_memory, used_memory);
+    printf("Underutilized memory: %.2f\n", underutilized_memory);
 }
 
+/*
+* A function that tests the memory allocation.
+* @param argc The number of arguments.
+* @param argv The array of arguments.
+* @return 0 if successful.
+*/
 int main ( int argc, char* argv[]) {
 
   printf("Starting test..\n");
